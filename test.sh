@@ -1,0 +1,2 @@
+dub build
+./docii test

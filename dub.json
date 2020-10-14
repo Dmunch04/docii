@@ -1,0 +1,11 @@
+{
+	"name": "docii",
+	"description": "A documentation generator for D",
+	"license": "MIT",
+	"copyright": "Copyright © 2020, Munchii",
+	"authors": ["Munchii"],
+
+	"dependencies": {
+		"libdparse": "*"
+	}
+}
