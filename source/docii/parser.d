@@ -100,12 +100,18 @@ private class DVisitor : ASTVisitor
 
     override void visit(const StructDeclaration decl)
     {
-        //writeln(parent.name);
+        DociiDeclaration previous = parent;
 
-        foreach (declaration; decl.structBody.declarations)
-        {
-            //writeln(declaration.declarations);
-        }
+        DociiDeclaration declaration = new DociiStructDeclaration(
+            decl.name.text,
+            decl.comment,
+            DeclarationLocation(path, filename, decl.name.line)
+        );
+        parent = declaration;
+
+        scope (exit) parent = previous;
+
+        previous.addDeclaration(declaration);
 
         decl.accept(this);
     }
@@ -135,21 +141,12 @@ struct DParser
 
         foreach (decl; visitor.parent.declarations)
         {
-            //writeln(decl.name);
-        }
-        
+            writeln(formatDecl(decl));
 
-        // TODO: Figure out how we make the `formatDecl` function recognize each declaration type without having to check for the type
-        // Although maybe i just need to check for the declarations type (`decl.type`) ^^
-
-        if (filename == "one.d")
-        {
-            writeln(formatDecl!DociiFunctionDeclaration(cast (DociiFunctionDeclaration) visitor.parent.declarations[0]));
-        }
-        else if (filename == "three.d")
-        {
-            writeln(formatDecl!DociiVariableDeclaration(cast (DociiVariableDeclaration) visitor.parent.declarations[0]));
-            writeln(formatDecl!DociiFunctionDeclaration(cast (DociiFunctionDeclaration) visitor.parent.declarations[1]));
+            foreach(sub; decl.declarations)
+            {
+                writeln(formatDecl(sub));
+            }
         }
 
         //return visitor.doc;

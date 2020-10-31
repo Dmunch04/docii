@@ -18,7 +18,6 @@ string yeet(T)(int a, int b = 5) @safe
 /++
  +
  +/
-/*
 struct TEST
 {
     /// a
@@ -33,4 +32,3 @@ struct TEST
     /// d
     string d = "hello";
 }
-*/

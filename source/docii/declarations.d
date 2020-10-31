@@ -3,37 +3,62 @@ module docii.declarations;
 /++
  +
  +/
-string formatDecl(T)(T element)
+string formatDecl(DociiDeclaration element)
 {
     import std.conv : to;
-    import std.array : join;
+    import std.array : join, appender;
 
-    static if (is(T == DeclarationLocation))
+    if (DociiFunctionDeclaration decl = cast(DociiFunctionDeclaration) element)
     {
-        DeclarationLocation location = cast (DeclarationLocation) element;
-        return location.path ~ "(" ~ location.filename ~ "):" ~ location.line.to!string;
+        auto sig = appender!string;
+        sig.put(decl.returnType);
+        sig.put(" ");
+        sig.put(decl.name);
+        if (decl.hasTemplateParemeters)
+        {
+            sig.put("(");
+            sig.put(decl.templateParameters.join(", "));
+            sig.put(")");
+        }
+        sig.put("(");
+        sig.put(decl.parameters.join(", "));
+        sig.put(")");
+        if (decl.hasAttributes)
+        {
+            sig.put(" ");
+            sig.put(decl.attributes.join(" "));
+        }
+        sig.put(";");
+
+        return sig.data;
     }
-    else static if (is(T == DociiFunctionDeclaration))
+    else if (DociiVariableDeclaration decl = cast(DociiVariableDeclaration) element)
     {
-        DociiFunctionDeclaration decl = cast (DociiFunctionDeclaration) element;
-        return decl.returnType ~ " " ~ decl.name ~ "(" ~ decl.templateParameters.join(", ") ~ ")(" ~ decl.parameters.join(", ") ~ ") " ~ decl.attributes.join(" ") ~ ";";
+        auto sig = appender!string;
+        sig.put(decl.valueType);
+        sig.put(" ");
+        sig.put(decl.name);
+        if (decl.hasValue)
+        {
+            sig.put(" = ");
+            sig.put(decl.value);
+        }
+        sig.put(";");
+        
+        return sig.data;
     }
-    else static if (is(T == DociiVariableDeclaration))
+    else if (DociiStructDeclaration decl = cast(DociiStructDeclaration) element)
     {
-        DociiVariableDeclaration decl = cast (DociiVariableDeclaration) element;
-        if (decl.value != "")
-            return decl.valueType ~ " " ~ decl.name ~ " = " ~ decl.value ~ ";";
-        else
-            return decl.valueType ~ " " ~ decl.name ~ ";";
-    }
-    else static if (is(T == DociiDeclaration))
-    {
-        DociiDeclaration decl = cast (DociiDeclaration) element;
-        return decl.name;
+        auto sig = appender!string;
+        sig.put("struct ");
+        sig.put(decl.name);
+        sig.put(";");
+
+        return sig.data;
     }
     else
     {
-        throw Exception("Incompatible type: " ~ typeof(T).to!string);
+        return element.name;
     }
 }
 
@@ -145,7 +170,8 @@ class DociiFunctionDeclaration : DociiDeclaration
     /++
      +
      +/
-    this(string name, string comment, DeclarationLocation location, string type, string templateParams, string params, string[] attrs)
+    this(string name, string comment, DeclarationLocation location, string type, string templateParams,
+         string params, string[] attrs)
     {
         super(name, comment, DeclarationType.FUNCTION, location);
 
@@ -156,6 +182,12 @@ class DociiFunctionDeclaration : DociiDeclaration
         this.parameters = params != "()" ? params[1..$ - 1].split(", ") : [];
         this.attributes = attrs;
     }
+
+    ///
+    @property bool hasTemplateParemeters() { return templateParameters.length > 0; }
+
+    ///
+    @property bool hasAttributes() { return attributes.length > 0; }
 }
 
 /++
@@ -178,5 +210,22 @@ class DociiVariableDeclaration : DociiDeclaration
 
         this.valueType = type;
         this.value = val;
+    }
+
+    ///
+    @property bool hasValue() { return value != ""; }
+}
+
+/++
+ +
+ +/
+class DociiStructDeclaration : DociiDeclaration
+{
+    /++
+     +
+     +/
+    this(string name, string comment, DeclarationLocation location)
+    {
+        super(name, comment, DeclarationType.STRUCT, location);
     }
 }
