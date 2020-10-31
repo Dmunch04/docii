@@ -71,8 +71,8 @@ private class DVisitor : ASTVisitor
         decl.accept(this);
     }
 
-	override void visit(const VariableDeclaration decl)
-	{
+    override void visit(const VariableDeclaration decl)
+    {
         string name = decl.declarators[0].name.text;
         string comment = decl.comment;
         
@@ -96,7 +96,7 @@ private class DVisitor : ASTVisitor
         parent.addDeclaration(declaration);
 
         decl.accept(this);
-	}
+    }
 
     override void visit(const StructDeclaration decl)
     {
