@@ -32,3 +32,72 @@ struct TEST
     /// d
     string d = "hello";
 }
+
+/++
+ +
+ +/
+enum TEST1
+{
+    ONE,
+    TWO,
+    THREE
+}
+
+/++
+ +
+ +/
+enum TEST2 : uint
+{
+    ONE = 1,
+    TWO = 2,
+    THREE = 3
+}
+
+/++
+ +
+ +/
+abstract class TEST3
+{
+    /++
+     +
+     +/
+    abstract void printName();
+}
+
+/++
+ +
+ +/
+class TEST4 : TEST3
+{
+    override void printName()
+    {
+        import std.stdio : writeln;
+        writeln("daniel");
+    }
+}
+
+/++
+ +
+ +/
+interface TEST5
+{
+    /++
+     +
+     +/
+    void printName();
+}
+
+/++
+ +
+ +/
+class TEST6 : TEST5
+{
+    /++
+     +
+     +/
+    void printName()
+    {
+        import std.stdio : writeln;
+        writeln("daniel");
+    }
+}

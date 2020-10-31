@@ -56,6 +56,60 @@ string formatDecl(DociiDeclaration element)
 
         return sig.data;
     }
+    else if (DociiEnumDeclaration decl = cast(DociiEnumDeclaration) element)
+    {
+        auto sig = appender!string;
+        sig.put("enum ");
+        sig.put(decl.name);
+        if (decl.hasEnumType)
+        {
+            sig.put(" : ");
+            sig.put(decl.enumType);
+        }
+        sig.put(";");
+
+        return sig.data;
+    }
+    else if (DociiClassDeclaration decl = cast(DociiClassDeclaration) element)
+    {
+        auto sig = appender!string;
+        sig.put("class ");
+        sig.put(decl.name);
+        if (decl.hasTemplateParemeters)
+        {
+            sig.put("(");
+            sig.put(decl.templateParameters.join(", "));
+            sig.put(")");
+        }
+        if (decl.hasBaseClasses)
+        {
+            sig.put(" : ");
+            sig.put(decl.baseClasses.join(", "));
+        }
+        sig.put(";");
+
+        return sig.data;
+    }
+    else if (DociiInterfaceDeclaration decl = cast(DociiInterfaceDeclaration) element)
+    {
+        auto sig = appender!string;
+        sig.put("interface ");
+        sig.put(decl.name);
+        if (decl.hasTemplateParemeters)
+        {
+            sig.put("(");
+            sig.put(decl.templateParameters.join(", "));
+            sig.put(")");
+        }
+        if (decl.hasBaseClasses)
+        {
+            sig.put(" : ");
+            sig.put(decl.baseClasses.join(", "));
+        }
+        sig.put(";");
+
+        return sig.data;
+    }
     else
     {
         return element.name;
@@ -228,4 +282,90 @@ class DociiStructDeclaration : DociiDeclaration
     {
         super(name, comment, DeclarationType.STRUCT, location);
     }
+}
+
+/++
+ +
+ +/
+class DociiEnumDeclaration : DociiDeclaration
+{
+    ///
+    string enumType;
+
+    /++
+     +
+     +/
+    this(string name, string comment, DeclarationLocation location, string enumType)
+    {
+        super(name, comment, DeclarationType.ENUM, location);
+
+        this.enumType = enumType;
+    }
+
+    ///
+    @property bool hasEnumType() { return enumType != ""; }
+}
+
+/++
+ +
+ +/
+class DociiClassDeclaration : DociiDeclaration
+{
+    ///
+    string[] templateParameters;
+
+    ///
+    string[] baseClasses;
+
+    /++
+     +
+     +/
+    this(string name, string comment, DeclarationLocation location, string templateParams, string baseClasses)
+    {
+        super(name, comment, DeclarationType.CLASS, location);
+
+        import std.array : split, replaceFirst;
+        import std.string : strip;
+
+        this.templateParameters = templateParams != "()" ? templateParams[1..$ - 1].split(", ") : [];
+        this.baseClasses = baseClasses != "()" ? baseClasses.strip().replaceFirst(":", "").strip().split(", ") : [];
+    }
+
+    ///
+    @property bool hasTemplateParemeters() { return templateParameters.length > 0; }
+
+    ///
+    @property bool hasBaseClasses() { return baseClasses.length > 0; }
+}
+
+/++
+ +
+ +/
+class DociiInterfaceDeclaration : DociiDeclaration
+{
+    ///
+    string[] templateParameters;
+
+    ///
+    string[] baseClasses;
+
+    /++
+     +
+     +/
+    this(string name, string comment, DeclarationLocation location, string templateParams, string baseClasses)
+    {
+        super(name, comment, DeclarationType.INTERFACE, location);
+
+        import std.array : split, replaceFirst;
+        import std.string : strip;
+
+        this.templateParameters = templateParams != "()" ? templateParams[1..$ - 1].split(", ") : [];
+        this.baseClasses = baseClasses != "()" ? baseClasses.strip().replaceFirst(":", "").strip().split(", ") : [];
+    }
+
+    ///
+    @property bool hasTemplateParemeters() { return templateParameters.length > 0; }
+
+    ///
+    @property bool hasBaseClasses() { return baseClasses.length > 0; }
 }

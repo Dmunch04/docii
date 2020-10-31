@@ -115,6 +115,95 @@ private class DVisitor : ASTVisitor
 
         decl.accept(this);
     }
+
+    override void visit(const EnumDeclaration decl)
+    {
+        auto enumType = appender!string;
+        if (decl.type !is null)
+            format(enumType, decl.type);
+        else
+            enumType.put("");
+
+        DociiDeclaration previous = parent;
+
+        DociiDeclaration declaration = new DociiEnumDeclaration(
+            decl.name.text,
+            decl.comment,
+            DeclarationLocation(path, filename, decl.name.line),
+            enumType.data
+        );
+        parent = declaration;
+
+        scope (exit) parent = previous;
+
+        previous.addDeclaration(declaration);
+
+        decl.accept(this);
+    }
+
+    override void visit(const ClassDeclaration decl)
+    {
+        auto templateParameters = appender!string;
+        if (decl.templateParameters !is null)
+            format(templateParameters, decl.templateParameters);
+        else
+            templateParameters.put("()");
+
+        auto baseClasses = appender!string;
+        if (decl.baseClassList !is null)
+            format(baseClasses, decl.baseClassList);
+        else
+            baseClasses.put("()");
+
+        DociiDeclaration previous = parent;
+
+        DociiDeclaration declaration = new DociiClassDeclaration(
+            decl.name.text,
+            decl.comment,
+            DeclarationLocation(path, filename, decl.name.line),
+            templateParameters.data,
+            baseClasses.data
+        );
+        parent = declaration;
+
+        scope (exit) parent = previous;
+
+        previous.addDeclaration(declaration);
+
+        decl.accept(this);
+    }
+
+    override void visit(const InterfaceDeclaration decl)
+    {
+        auto templateParameters = appender!string;
+        if (decl.templateParameters !is null)
+            format(templateParameters, decl.templateParameters);
+        else
+            templateParameters.put("()");
+
+        auto baseClasses = appender!string;
+        if (decl.baseClassList !is null)
+            format(baseClasses, decl.baseClassList);
+        else
+            baseClasses.put("()");
+
+        DociiDeclaration previous = parent;
+
+        DociiDeclaration declaration = new DociiInterfaceDeclaration(
+            decl.name.text,
+            decl.comment,
+            DeclarationLocation(path, filename, decl.name.line),
+            templateParameters.data,
+            baseClasses.data
+        );
+        parent = declaration;
+
+        scope (exit) parent = previous;
+
+        previous.addDeclaration(declaration);
+
+        decl.accept(this);
+    }
 }
 
 /++
@@ -138,6 +227,8 @@ struct DParser
         auto mod = parseModule(tokens, filename, &rba);
         auto visitor = new DVisitor(path, filename);
         visitor.visit(mod);
+
+        // TODO: Multiple places i split string lists by ", " which is wrong, as the format could be "(a,b,c)" instaed of "(a, b, c)"
 
         foreach (decl; visitor.parent.declarations)
         {
