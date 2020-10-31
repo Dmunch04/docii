@@ -4,7 +4,6 @@ import std.file;
 import std.stdio;
 import std.algorithm;
 
-import docii.markdown;
 import docii.parser;
 
 /++
@@ -74,7 +73,7 @@ struct Program
         auto parser = DParser();
         foreach(file; files)
         {
-            auto res = parser.parseFile(readText(file));
+            parser.parseFile(file, readText(file));
         }
     }
 }
