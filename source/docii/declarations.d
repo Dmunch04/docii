@@ -1,120 +1,7 @@
 module docii.declarations;
 
-/++
- +
- +/
-string formatDecl(DociiDeclaration element)
-{
-    import std.conv : to;
-    import std.array : join, appender;
-
-    if (DociiFunctionDeclaration decl = cast(DociiFunctionDeclaration) element)
-    {
-        auto sig = appender!string;
-        sig.put(decl.returnType);
-        sig.put(" ");
-        sig.put(decl.name);
-        if (decl.hasTemplateParemeters)
-        {
-            sig.put("(");
-            sig.put(decl.templateParameters.join(", "));
-            sig.put(")");
-        }
-        sig.put("(");
-        sig.put(decl.parameters.join(", "));
-        sig.put(")");
-        if (decl.hasAttributes)
-        {
-            sig.put(" ");
-            sig.put(decl.attributes.join(" "));
-        }
-        sig.put(";");
-
-        return sig.data;
-    }
-    else if (DociiVariableDeclaration decl = cast(DociiVariableDeclaration) element)
-    {
-        auto sig = appender!string;
-        sig.put(decl.valueType);
-        sig.put(" ");
-        sig.put(decl.name);
-        if (decl.hasValue)
-        {
-            sig.put(" = ");
-            sig.put(decl.value);
-        }
-        sig.put(";");
-        
-        return sig.data;
-    }
-    else if (DociiStructDeclaration decl = cast(DociiStructDeclaration) element)
-    {
-        auto sig = appender!string;
-        sig.put("struct ");
-        sig.put(decl.name);
-        sig.put(";");
-
-        return sig.data;
-    }
-    else if (DociiEnumDeclaration decl = cast(DociiEnumDeclaration) element)
-    {
-        auto sig = appender!string;
-        sig.put("enum ");
-        sig.put(decl.name);
-        if (decl.hasEnumType)
-        {
-            sig.put(" : ");
-            sig.put(decl.enumType);
-        }
-        sig.put(";");
-
-        return sig.data;
-    }
-    else if (DociiClassDeclaration decl = cast(DociiClassDeclaration) element)
-    {
-        auto sig = appender!string;
-        sig.put("class ");
-        sig.put(decl.name);
-        if (decl.hasTemplateParemeters)
-        {
-            sig.put("(");
-            sig.put(decl.templateParameters.join(", "));
-            sig.put(")");
-        }
-        if (decl.hasBaseClasses)
-        {
-            sig.put(" : ");
-            sig.put(decl.baseClasses.join(", "));
-        }
-        sig.put(";");
-
-        return sig.data;
-    }
-    else if (DociiInterfaceDeclaration decl = cast(DociiInterfaceDeclaration) element)
-    {
-        auto sig = appender!string;
-        sig.put("interface ");
-        sig.put(decl.name);
-        if (decl.hasTemplateParemeters)
-        {
-            sig.put("(");
-            sig.put(decl.templateParameters.join(", "));
-            sig.put(")");
-        }
-        if (decl.hasBaseClasses)
-        {
-            sig.put(" : ");
-            sig.put(decl.baseClasses.join(", "));
-        }
-        sig.put(";");
-
-        return sig.data;
-    }
-    else
-    {
-        return element.name;
-    }
-}
+import std.conv;
+import std.array;
 
 /++
  +
@@ -150,6 +37,15 @@ struct DeclarationLocation
 
     ///
     size_t line;
+
+    /++
+     +
+     +/
+    @property string toString()
+    {
+        import std.format : format;
+        return format!"%s:%d"(path, line);
+    }
 }
 
 /++
@@ -202,6 +98,14 @@ class DociiDeclaration
 
         declarations ~= decl;
     }
+
+    /++
+     +
+     +/
+    string makeSignature()
+    {
+        return name;
+    }
 }
 
 /++
@@ -242,6 +146,34 @@ class DociiFunctionDeclaration : DociiDeclaration
 
     ///
     @property bool hasAttributes() { return attributes.length > 0; }
+
+    /++
+     +
+     +/
+    override string makeSignature()
+    {
+        auto sig = appender!string;
+        sig.put(returnType);
+        sig.put(" ");
+        sig.put(name);
+        if (hasTemplateParemeters)
+        {
+            sig.put("(");
+            sig.put(templateParameters.join(", "));
+            sig.put(")");
+        }
+        sig.put("(");
+        sig.put(parameters.join(", "));
+        sig.put(")");
+        if (hasAttributes)
+        {
+            sig.put(" ");
+            sig.put(attributes.join(" "));
+        }
+        sig.put(";");
+
+        return sig.data;
+    }
 }
 
 /++
@@ -268,6 +200,25 @@ class DociiVariableDeclaration : DociiDeclaration
 
     ///
     @property bool hasValue() { return value != ""; }
+
+    /++
+     +
+     +/
+    override string makeSignature()
+    {
+        auto sig = appender!string;
+        sig.put(valueType);
+        sig.put(" ");
+        sig.put(name);
+        if (hasValue)
+        {
+            sig.put(" = ");
+            sig.put(value);
+        }
+        sig.put(";");
+        
+        return sig.data;
+    }
 }
 
 /++
@@ -281,6 +232,19 @@ class DociiStructDeclaration : DociiDeclaration
     this(string name, string comment, DeclarationLocation location)
     {
         super(name, comment, DeclarationType.STRUCT, location);
+    }
+
+    /++
+     +
+     +/
+    override string makeSignature()
+    {
+        auto sig = appender!string;
+        sig.put("struct ");
+        sig.put(name);
+        sig.put(";");
+
+        return sig.data;
     }
 }
 
@@ -304,6 +268,24 @@ class DociiEnumDeclaration : DociiDeclaration
 
     ///
     @property bool hasEnumType() { return enumType != ""; }
+
+    /++
+     +
+     +/
+    override string makeSignature()
+    {
+        auto sig = appender!string;
+        sig.put("enum ");
+        sig.put(name);
+        if (hasEnumType)
+        {
+            sig.put(" : ");
+            sig.put(enumType);
+        }
+        sig.put(";");
+
+        return sig.data;
+    }
 }
 
 /++
@@ -336,6 +318,30 @@ class DociiClassDeclaration : DociiDeclaration
 
     ///
     @property bool hasBaseClasses() { return baseClasses.length > 0; }
+
+    /++
+     +
+     +/
+    override string makeSignature()
+    {
+        auto sig = appender!string;
+        sig.put("class ");
+        sig.put(name);
+        if (hasTemplateParemeters)
+        {
+            sig.put("(");
+            sig.put(templateParameters.join(", "));
+            sig.put(")");
+        }
+        if (hasBaseClasses)
+        {
+            sig.put(" : ");
+            sig.put(baseClasses.join(", "));
+        }
+        sig.put(";");
+
+        return sig.data;
+    }
 }
 
 /++
@@ -368,4 +374,28 @@ class DociiInterfaceDeclaration : DociiDeclaration
 
     ///
     @property bool hasBaseClasses() { return baseClasses.length > 0; }
+
+    /++
+     +
+     +/
+    override string makeSignature()
+    {
+        auto sig = appender!string;
+        sig.put("interface ");
+        sig.put(name);
+        if (hasTemplateParemeters)
+        {
+            sig.put("(");
+            sig.put(templateParameters.join(", "));
+            sig.put(")");
+        }
+        if (hasBaseClasses)
+        {
+            sig.put(" : ");
+            sig.put(baseClasses.join(", "));
+        }
+        sig.put(";");
+
+        return sig.data;
+    }
 }

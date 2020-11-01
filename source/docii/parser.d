@@ -214,9 +214,8 @@ struct DParser
     /++
      +
      +/
-    public void parseFile(string path, string sourceCode)
+    public DociiDeclaration parseFile(string path, string sourceCode)
     {
-        import std.array : split;
         string filename = path.split("/")[$ - 1];
 
         LexerConfig config;
@@ -232,14 +231,15 @@ struct DParser
 
         foreach (decl; visitor.parent.declarations)
         {
-            writeln(formatDecl(decl));
+            writeln(decl.makeSignature());
+            writeln(decl.location.toString);
 
             foreach(sub; decl.declarations)
             {
-                writeln(formatDecl(sub));
+                writeln(sub.makeSignature());
             }
         }
 
-        //return visitor.doc;
+        return visitor.parent;
     }
 }

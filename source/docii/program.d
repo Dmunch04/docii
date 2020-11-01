@@ -5,14 +5,28 @@ import std.stdio;
 import std.algorithm;
 
 import docii.parser;
+import docii.declarations;
+import docii.logging.logger;
+import docii.generator;
+
+/++
+ +
+ +/
+enum DocsFormatting
+{
+    markdown,
+    html
+}
 
 /++
  +
  +/
 struct Program
 {
-    private {
+    private
+    {
         string outputPath = "/docs";
+        DocsFormatting formatting = DocsFormatting.markdown;
     }
 
     /++
@@ -34,6 +48,7 @@ struct Program
                 config.caseInsensitive,
 
                 "output|o", "The output directory where the docs should be generated in", &outputPath,
+                "format|f", "The format of which the docs should be generated as. Can be 'markdown' or 'html'", &formatting
             );
 
             if (help.helpWanted)
@@ -41,15 +56,14 @@ struct Program
                 defaultGetoptPrinter("All available arguments:", help.options);
             }
         }
-        // If an unkown argument was passed, error out
-        catch (GetOptException e)
+        catch(Exception e)
         {
-            // error: e.msg
+            logger.error(e.msg);
         }
 
         if (args.length <= 0)
         {
-            // error: no path specified
+            logger.error("no path specified");
         }
 
         run(args[0]);
@@ -59,21 +73,24 @@ struct Program
     {
         if (!exists(path))
         {
-            // error
-            return;
+            logger.error("path does not exist (" ~ path ~ ")");
         }
 
-        if (!isDir(path))
-        {
-            // error
-            return;
-        }
-
-        auto files = dirEntries(path, SpanMode.depth).filter!(f => f.name.endsWith(".d"));
         auto parser = DParser();
-        foreach(file; files)
+
+        // TODO: What should the generators output? A string or a struct/class holding the data
+
+        if (isDir(path))
         {
-            parser.parseFile(file, readText(file));
+            auto files = dirEntries(path, SpanMode.depth).filter!(f => f.name.endsWith(".d"));
+            foreach(file; files)
+            {
+                DociiDeclaration fileDeclaration = parser.parseFile(file, readText(file));
+            }
+        }
+        else
+        {
+            DociiDeclaration fileDeclaration = parser.parseFile(path, readText(path));
         }
     }
 }

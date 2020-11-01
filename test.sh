@@ -1,2 +1,2 @@
 dub build
-./docii test
+./docii test --format=markdown
