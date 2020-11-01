@@ -12,7 +12,7 @@ import docii.generator;
 /++
  +
  +/
-enum DocsFormatting
+enum DocsFormat
 {
     markdown,
     html
@@ -26,7 +26,7 @@ struct Program
     private
     {
         string outputPath = "/docs";
-        DocsFormatting formatting = DocsFormatting.markdown;
+        DocsFormat formatting = DocsFormat.markdown;
     }
 
     /++
