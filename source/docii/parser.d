@@ -204,6 +204,8 @@ private class DVisitor : ASTVisitor
 
         decl.accept(this);
     }
+
+    // TODO: Add the rest of the declarations
 }
 
 /++
@@ -226,19 +228,6 @@ struct DParser
         auto mod = parseModule(tokens, filename, &rba);
         auto visitor = new DVisitor(path, filename);
         visitor.visit(mod);
-
-        // TODO: Multiple places i split string lists by ", " which is wrong, as the format could be "(a,b,c)" instaed of "(a, b, c)"
-
-        foreach (decl; visitor.parent.declarations)
-        {
-            writeln(decl.makeSignature());
-            writeln(decl.location.toString);
-
-            foreach(sub; decl.declarations)
-            {
-                writeln(sub.makeSignature());
-            }
-        }
 
         return visitor.parent;
     }

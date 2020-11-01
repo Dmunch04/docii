@@ -2,6 +2,17 @@ module docii.declarations;
 
 import std.conv;
 import std.array;
+import std.string;
+
+private string[] splitStrip(string s, string sep = ",")
+{
+    string[] items = s.split(sep);
+    foreach(ref e; items)
+    {
+        e = e.strip();
+    }
+    return items;
+}
 
 /++
  +
@@ -93,9 +104,6 @@ class DociiDeclaration
      +/
     void addDeclaration(DociiDeclaration decl)
     {
-        import std.stdio : writeln;
-        //writeln(decl.name);
-
         declarations ~= decl;
     }
 
@@ -133,11 +141,9 @@ class DociiFunctionDeclaration : DociiDeclaration
     {
         super(name, comment, DeclarationType.FUNCTION, location);
 
-        import std.array : split;
-
         this.returnType = type;
-        this.templateParameters = templateParams != "()" ? templateParams[1..$ - 1].split(", ") : [];
-        this.parameters = params != "()" ? params[1..$ - 1].split(", ") : [];
+        this.templateParameters = templateParams != "()" ? splitStrip(templateParams[1..$ - 1]) : [];
+        this.parameters = params != "()" ? splitStrip(params[1..$ - 1]) : [];
         this.attributes = attrs;
     }
 
@@ -306,11 +312,8 @@ class DociiClassDeclaration : DociiDeclaration
     {
         super(name, comment, DeclarationType.CLASS, location);
 
-        import std.array : split, replaceFirst;
-        import std.string : strip;
-
-        this.templateParameters = templateParams != "()" ? templateParams[1..$ - 1].split(", ") : [];
-        this.baseClasses = baseClasses != "()" ? baseClasses.strip().replaceFirst(":", "").strip().split(", ") : [];
+        this.templateParameters = templateParams != "()" ? splitStrip(templateParams[1..$ - 1]) : [];
+        this.baseClasses = baseClasses != "()" ? splitStrip(baseClasses.strip().replaceFirst(":", "").strip()) : [];
     }
 
     ///
@@ -362,11 +365,8 @@ class DociiInterfaceDeclaration : DociiDeclaration
     {
         super(name, comment, DeclarationType.INTERFACE, location);
 
-        import std.array : split, replaceFirst;
-        import std.string : strip;
-
-        this.templateParameters = templateParams != "()" ? templateParams[1..$ - 1].split(", ") : [];
-        this.baseClasses = baseClasses != "()" ? baseClasses.strip().replaceFirst(":", "").strip().split(", ") : [];
+        this.templateParameters = templateParams != "()" ? splitStrip(templateParams[1..$ - 1]) : [];
+        this.baseClasses = baseClasses != "()" ? splitStrip(baseClasses.strip().replaceFirst(":", "").strip()) : [];
     }
 
     ///
