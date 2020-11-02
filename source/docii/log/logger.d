@@ -15,7 +15,7 @@ struct Logger
      +/
     void print(string s)
     {
-        writeln(s);
+        writeln(Color.RESET ~ s ~ Color.RESET);
     }
 
     /++
@@ -23,7 +23,7 @@ struct Logger
      +/
     void printExit(string s, uint code = -1)
     {
-        writeln(s);
+        writeln(Color.RESET ~ s ~ Color.RESET);
         exit(code);
     }
 

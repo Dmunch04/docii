@@ -4,10 +4,9 @@ import std.file;
 import std.stdio;
 import std.algorithm;
 
-import docii.parse.parser;
-import docii.parse.declarations;
-import docii.log.logger;
-import docii.parse.docs;
+import docii.parse;
+import docii.log : logger, Color;
+import docii.generate : DociiMarkdownGenerator, DociiHtmlGenerator;
 
 /++
  +
@@ -80,7 +79,7 @@ struct Program
 
         auto parser = DParser();
 
-        // TODO: What should the generators output? A string or a struct/class holding the data
+        // TODO: Fix the emojis and verbose messages. make them look good with emojis and stuff
 
         if (isDir(path))
         {
@@ -98,6 +97,8 @@ struct Program
 
     private void generateFile(DParser parser, string path)
     {
+        writeln("generating " ~ path ~ "  ");
+
         DociiDeclaration fileDeclaration = parser.parseFile(path, readText(path));
         Doc[string] docs;
         foreach (i, decl; fileDeclaration.declarations)
@@ -105,9 +106,43 @@ struct Program
             docs[decl.name] = parseComment(decl.type, decl.comment);
         }
 
-        foreach (name, doc; docs)
+        if (verbose)
         {
-            writeln(name ~ ": " ~ doc.info);
+            checkDocs(docs);
         }
+
+        final switch (formatting)
+        {
+            case DocsFormat.markdown:
+            {
+                DociiMarkdownGenerator gen = new DociiMarkdownGenerator(
+                    outputPath,
+                    fileDeclaration,
+                    docs,
+                    verbose
+                );
+
+                gen.generateFile();
+
+                break;
+            }
+
+            case DocsFormat.html:
+            {
+                DociiHtmlGenerator gen = new DociiHtmlGenerator(
+                    outputPath,
+                    fileDeclaration,
+                    docs,
+                    verbose
+                );
+
+                gen.generateFile();
+
+                break;
+            }
+        }
+
+        stdout.write("\r" ~ Color.GREEN ~ "✔" ~ Color.WHITE ~ " generated " ~ path ~ "  \n");
+        stdout.flush();
     }
 }
