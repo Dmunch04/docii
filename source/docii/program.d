@@ -4,10 +4,9 @@ import std.file;
 import std.stdio;
 import std.algorithm;
 
-import docii.parser;
-import docii.declarations;
-import docii.logging.logger;
-import docii.generator;
+import docii.parse.parser;
+import docii.parse.declarations;
+import docii.log.logger;
 
 /++
  +
