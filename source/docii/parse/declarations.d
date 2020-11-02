@@ -99,6 +99,19 @@ class DociiDeclaration
         this.declarations = decls;
     }
 
+    ///
+    @property bool isCommented() { return comment != ""; }
+
+    ///
+    @property ulong childrenCount()
+    {
+        import std.algorithm.iteration : each;
+
+        ulong cc = declarations.length;
+        declarations.each!(child => cc += child.childrenCount);
+        return cc;
+    }
+
     /++
      +
      +/

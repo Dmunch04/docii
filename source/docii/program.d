@@ -7,6 +7,7 @@ import std.algorithm;
 import docii.parse.parser;
 import docii.parse.declarations;
 import docii.log.logger;
+import docii.parse.docs;
 
 /++
  +
@@ -24,6 +25,7 @@ struct Program
 {
     private
     {
+        bool verbose = false;
         string outputPath = "/docs";
         DocsFormat formatting = DocsFormat.markdown;
     }
@@ -46,6 +48,7 @@ struct Program
                 args,
                 config.caseInsensitive,
 
+                "verbose", "Should docii output extra information when generating documentation?", &verbose,
                 "output|o", "The output directory where the docs should be generated in", &outputPath,
                 "format|f", "The format of which the docs should be generated as. Can be 'markdown' or 'html'", &formatting
             );
@@ -84,12 +87,27 @@ struct Program
             auto files = dirEntries(path, SpanMode.depth).filter!(f => f.name.endsWith(".d"));
             foreach(file; files)
             {
-                DociiDeclaration fileDeclaration = parser.parseFile(file, readText(file));
+                generateFile(parser, file);
             }
         }
         else
         {
-            DociiDeclaration fileDeclaration = parser.parseFile(path, readText(path));
+            generateFile(parser, path);
+        }
+    }
+
+    private void generateFile(DParser parser, string path)
+    {
+        DociiDeclaration fileDeclaration = parser.parseFile(path, readText(path));
+        Doc[string] docs;
+        foreach (i, decl; fileDeclaration.declarations)
+        {
+            docs[decl.name] = parseComment(decl.type, decl.comment);
+        }
+
+        foreach (name, doc; docs)
+        {
+            writeln(name ~ ": " ~ doc.info);
         }
     }
 }
