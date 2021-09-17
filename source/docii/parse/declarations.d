@@ -78,6 +78,8 @@ class DociiDeclaration
 
     /// All sub-declarations
     DociiDeclaration[] declarations;
+    
+    private ulong _childrenCount = -1;
 
     /++
      +
@@ -105,10 +107,16 @@ class DociiDeclaration
     ///
     @property ulong childrenCount()
     {
+        if (this._childrenCount != -1)
+        {
+            return this._childrenCount;
+        }
+        
         import std.algorithm.iteration : each;
 
         ulong cc = declarations.length;
         declarations.each!(child => cc += child.childrenCount);
+        this._childrenCount = cc;
         return cc;
     }
 
